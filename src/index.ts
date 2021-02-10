@@ -1,9 +1,44 @@
 require("dotenv").config();
+import * as admin from "firebase-admin";
+import * as functions from "firebase-functions";
 import { discordToken, prefix } from "./config";
 import { Client, Collection } from "discord.js";
 import Logger from "./core/Logger";
 import { Bot } from "./types/types";
 import commands from "./commands";
+import { populateRole } from './database/index';
+import { KEYSTORE_COLLECTION_NAME } from "./database/model/KeyStore";
+import { MEETING_COLELCTION_NAME } from "./database/model/Meeting";
+import { PROJECT_COLLECTION_NAME } from "./database/model/Project";
+import { ROLES_COLLECTION_NAME } from "./database/model/Role";
+import { USER_COLLECTION_NAME } from "./database/model/User";
+
+//Firestore dec start
+try {
+  admin.initializeApp(functions.config().firebase);
+} catch (e) {
+  functions.logger.info("Error in initilizing firestore");
+}
+export const firestoreInstance = admin.firestore();
+export const firestoreAltInstance = admin.firestore;
+export type FirestoreDocRef = FirebaseFirestore.DocumentReference<
+  FirebaseFirestore.DocumentData
+>;
+export type FirestoreDoc = FirebaseFirestore.DocumentData;
+export const usersRef = firestoreInstance.collection(USER_COLLECTION_NAME);
+export const projectsRef = firestoreInstance.collection(
+  PROJECT_COLLECTION_NAME
+);
+export const meetingsRef = firestoreInstance.collection(
+  MEETING_COLELCTION_NAME
+);
+export const keystoreRef = firestoreInstance.collection(KEYSTORE_COLLECTION_NAME);
+export const rolesRef = firestoreInstance.collection(ROLES_COLLECTION_NAME);
+export const PROJECT_FCM_TOPIC = "projects";
+(async () => {
+  await populateRole();
+})()
+//Firestore dec end
 
 process.on("unhandledRejection", (error) => {
   console.error("Unhandled promise rejection:", error);
